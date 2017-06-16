@@ -20,7 +20,7 @@
   ```Javascript
   require.config({
     'paths': {
-        'bmsanalytics': '../bms-web-sdk/bmsanalytics'
+        'bmsanalytics': '/path/to/bmsanalytics.js'
       }
   });
 
