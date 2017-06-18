@@ -12,7 +12,7 @@
   
 * Following are examples of integrating the IBM Bluemix Mobile Analytics bmsanalytics as a module, using 'define', and an example of integrating the IBM Bluemix Mobile Analytics bmsanalytics on the global context.
   
-  Example usage as module, using 'define':
+  Example usage as module, using 'require':
   -----------------------------------
   
   Using module loader requirejs 
