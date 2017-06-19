@@ -1029,7 +1029,8 @@ function setInitParams(params) {
 	LOG_UPLOADER_APP_ROUTE='mobile-analytics-dashboard';
 	KEY_LOCAL_STORAGE_LOGS = '__BMS_WEBLOG_LOGS__',
 	KEY_LOCAL_STORAGE_SWAP = '__BMS_WEBLOG_SWAP__',
-	KEY_LOCAL_STORAGE_ANALYTICS = '__BMS_WEBLOG_ANALYTICS__',
+	KEY_LOCAL_STORAGE_ANALYTICS_LIFECYCLE = '__BMS_WEBLOG_ANALYTICS__LIFECYCLE',
+	KEY_LOCAL_STORAGE_ANALYTICS_NETWORKTRANS ='__BMS_WEBLOG_ANALYTICS__NETWORKTRANS',
 	KEY_LOCAL_STORAGE_CONFIG = '__BMS_WEBLOG_CONFIG__',
 	KEY_REMOTE_STORAGE_CONFIG = '__BMS_WEBLOG_REMOTE_CONFIG__',
 
@@ -1075,7 +1076,13 @@ function setInitParams(params) {
 	var instanceId='';
 	var bmsRegion='';
 	var hasUsercontext=false;
-
+	var deviceEvents={
+    	ALL:0,
+    	LIFECYCLE:1,
+    	NETWORKTRANSACTION:2,
+    	NONE:3
+    };
+	var deviceEvents0=deviceEvents.ALL;
 	if (!window.console) {  // thanks a lot, IE9
   		/*jshint -W020 */
 		console = {
@@ -1328,7 +1335,7 @@ function setInitParams(params) {
 				 'metadata': logMetadata
 				};
 				
-    			__persistLog(logData, KEY_LOCAL_STORAGE_ANALYTICS);
+    			__persistLog(logData, KEY_LOCAL_STORAGE_ANALYTICS_NETWORKTRANS);
     			return true;
 				
 			}catch(e){
@@ -1381,7 +1388,7 @@ function setInitParams(params) {
 					 'msg': 'InternalRequestSender logInboundResponse',
 					 'metadata': metadata
 					};
-    			__persistLog(logData, KEY_LOCAL_STORAGE_ANALYTICS);
+    			__persistLog(logData, KEY_LOCAL_STORAGE_ANALYTICS_LIFECYCLE);
 				}
 			}catch(e){
 			}
@@ -1398,7 +1405,7 @@ function setInitParams(params) {
 				 'msg': 'InternalRequestSender logInboundResponse',
 				 'metadata': metadata
 				};
-				__persistLog(logData, KEY_LOCAL_STORAGE_ANALYTICS);
+				__persistLog(logData, KEY_LOCAL_STORAGE_ANALYTICS_LIFECYCLE);
 				
 			}catch(e){
 				console.error('analytics: Failed to log event');
@@ -1794,7 +1801,7 @@ function setInitParams(params) {
             metadata : {},
             capture : udf,
             captureFromServer : udf,
-            analyticsCapture : udf,
+            analyticsCapture : true,
             allDomains : udf,
             maxFileSize : udf,
             autoSendLogs: true
@@ -2018,7 +2025,7 @@ function setInitParams(params) {
 		return null;
     };
 
-    function __log(args, priority) {
+    function __log(args, priority,deviceevents) {
     	priority = priority.toLowerCase();
         //TODO check if env is IE and then set console.trace = console.debug;
 		state = __state();
@@ -2077,10 +2084,14 @@ function setInitParams(params) {
 					  'metadata': meta
 					};
 					//console.log('++ '+level+' '+state.analyticsCapture);
-					if(level === 'ANALYTICS' && state.analyticsCapture !== false){
+					if(level === 'ANALYTICS' && deviceevents=='LIFECYCLE' && state.analyticsCapture !== false){
 						//console.log('>>analytics log');
-					  __persistLog(logData, KEY_LOCAL_STORAGE_ANALYTICS);
-					}else if(state.capture !== false){
+					  __persistLog(logData, KEY_LOCAL_STORAGE_ANALYTICS_LIFECYCLE);
+					}else if(level === 'ANALYTICS' && deviceevents=='NETWORKTRANSACTION' && state.analyticsCapture !== false){
+
+					  __persistLog(logData, KEY_LOCAL_STORAGE_ANALYTICS_NETWORKTRANS);
+					}
+					else if(state.capture !== false){
 						//console.log('>> log');
 					  __persistLog(logData, KEY_LOCAL_STORAGE_LOGS);
 					}
@@ -2134,7 +2145,7 @@ function setInitParams(params) {
     	// 		return _processAutomaticTrigger();
     	// 	}
     	// }
-        return __send([KEY_LOCAL_STORAGE_ANALYTICS,KEY_LOCAL_STORAGE_LOGS, KEY_LOCAL_STORAGE_SWAP]);
+        return __send([KEY_LOCAL_STORAGE_ANALYTICS_LIFECYCLE,KEY_LOCAL_STORAGE_ANALYTICS_NETWORKTRANS,KEY_LOCAL_STORAGE_LOGS, KEY_LOCAL_STORAGE_SWAP]);
     };
 
 
@@ -2193,7 +2204,7 @@ function setInitParams(params) {
     	};
     	state.metadata = meta;
     	_pkg('bms.analytics');
-    	__log('appSession','ANALYTICS');
+    	__log('appSession','ANALYTICS','LIFECYCLE');
 
 		var meta2 = {
     	 '$class' : 'Object',
@@ -2223,7 +2234,7 @@ function setInitParams(params) {
     	 };
     	state.metadata = meta;
     	_pkg('bms.analytics');
-    	__log('appSession','ANALYTICS');
+    	__log('appSession','ANALYTICS','LIFECYCLE');
 	};
 	
 	function logAnalyticsSessionStart() {
@@ -2234,7 +2245,7 @@ function setInitParams(params) {
     	};
     	state.metadata = meta;
     	_pkg('bms.analytics');
-    	__log('appSession','ANALYTICS');
+    	__log('appSession','ANALYTICS','LIFECYCLE');
 	};
 	
 	function logAnalyticsSessionStop() {
@@ -2249,7 +2260,7 @@ function setInitParams(params) {
     	appSessionID = generateUUID('new');
     	state.metadata = meta;
     	_pkg('bms.analytics');
-    	__log('appSession','ANALYTICS');
+    	__log('appSession','ANALYTICS','LIFECYCLE');
 	};
 
 	function isNewSession(){
@@ -2307,7 +2318,7 @@ function setInitParams(params) {
 
 
  	//deviceID, appName, apiKey,bmsregion,serveroverride;
- 	function _init(appname,apikey,hasusercontext,instanceid){ //deviceevents,
+ 	function _init(appname,apikey,hasusercontext,deviceevents,instanceid){ //,
     	var dfd = BMSJQ.Deferred();
 
 
@@ -2349,6 +2360,11 @@ function setInitParams(params) {
     		hasUsercontext=hasusercontext;
     	}
     	console.log('***hasUsercontext'+hasUsercontext);
+
+		if(deviceevents!=null && deviceevents>=0 && deviceevents<=3)
+		{
+			deviceEvents0=deviceevents;
+		}    	
     	// if(bmsregion!=null && bmsregion!='')
     	// {
     	// 	bmsRegion=bmsregion;
@@ -2427,6 +2443,8 @@ function setInitParams(params) {
 
     };
 
+   
+
     // Internal Testing 
     var _setServerOverride=function (serveraddr){
     	serveroverride=serveraddr;
@@ -2459,7 +2477,19 @@ function setInitParams(params) {
     	// 		return _processAutomaticTrigger();
     	// 	}
     	// }
-        return __send([KEY_LOCAL_STORAGE_ANALYTICS]);//[KEY_LOCAL_STORAGE_ANALYTICS,KEY_LOCAL_STORAGE_LOGS, KEY_LOCAL_STORAGE_SWAP]
+    	if(deviceEvents0==deviceEvents.ALL){
+    		console.log('send ALL analytics'+deviceEvents0);
+    		return __send([KEY_LOCAL_STORAGE_ANALYTICS_LIFECYCLE,KEY_LOCAL_STORAGE_ANALYTICS_NETWORKTRANS]);
+    	}
+    	else if(deviceEvents0==deviceEvents.LIFECYCLE){
+    		return __send([KEY_LOCAL_STORAGE_ANALYTICS_LIFECYCLE]);
+    	}
+    	else if(deviceEvents0==deviceEvents.NETWORKTRANSACTION){
+    		return __send([KEY_LOCAL_STORAGE_ANALYTICS_NETWORKTRANS]);
+    	}
+        else {
+        	return __send([]);
+        }
     };
 
     //public analytics
@@ -2701,6 +2731,7 @@ function setInitParams(params) {
 	return {
 	    initialize: _init,
 	    Client:client,
+	    DeviceEvents:deviceEvents,
 		enable : _enable,
 		disable :_disable,
 		getAppName : _getAppName,
@@ -2709,7 +2740,7 @@ function setInitParams(params) {
 		send: __sendAllAnalytics,
 		setUserIdentity: _setUserIdentity,
 		log: _log,
-		logger: logger,
+		Logger: logger,
 		_config:_config,
 		//Testing 
 		overrideServerhost: _setServerOverride,
