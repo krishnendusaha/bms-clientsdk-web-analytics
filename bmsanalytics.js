@@ -1033,7 +1033,9 @@ function setInitParams(params) {
 	KEY_LOCAL_STORAGE_ANALYTICS_NETWORKTRANS ='__BMS_WEBLOG_ANALYTICS__NETWORKTRANS',
 	KEY_LOCAL_STORAGE_CONFIG = '__BMS_WEBLOG_CONFIG__',
 	KEY_REMOTE_STORAGE_CONFIG = '__BMS_WEBLOG_REMOTE_CONFIG__',
-
+	REGION_US_SOUTH_URL='.ng.bluemix.net',
+	REGION_UK_URL='.eu-gb.bluemix.net',
+	REGION_SYDNEY_URL='.au-syd.bluemix.net',
 
 	DEFAULT_MAX_STORAGE_SIZE = 500000,
 	BUFFER_TIME_IN_MILLISECONDS = 60000,
@@ -1229,7 +1231,7 @@ function setInitParams(params) {
             	console.log('analytics: There are no persisted logs to send.');
             	resolve('There were no persisted logs to send');
             	return;
-        }
+        	}
         //* console.log('inside send');     		
 		__ajax(data, REQ_SEND_LOGS)
 			.then(function (response) {
@@ -1259,15 +1261,15 @@ function setInitParams(params) {
 			//Addition
 			if(bmsRegion==0)
 			{
-				url='https://'+LOG_UPLOADER_APP_ROUTE+'.ng.bluemix.net';
+				url='https://'+LOG_UPLOADER_APP_ROUTE+REGION_US_SOUTH_URL;
 			}
 			else if(bmsRegion==1)
 			{
-				url='https://'+LOG_UPLOADER_APP_ROUTE+'.eu-gb.bluemix.net';
+				url='https://'+LOG_UPLOADER_APP_ROUTE+REGION_UK_URL;
 			}
 			else if(bmsRegion==2) 
 			{
-				url='https://'+LOG_UPLOADER_APP_ROUTE+'.au-syd.bluemix.net';;	
+				url='https://'+LOG_UPLOADER_APP_ROUTE+REGION_SYDNEY_URL;;	
 			}
 			else
 			{
@@ -2320,12 +2322,10 @@ function setInitParams(params) {
  	//deviceID, appName, apiKey,bmsregion,serveroverride;
  	function _init(appname,apikey,hasusercontext,deviceevents,instanceid){ //,
     	var dfd = BMSJQ.Deferred();
-
-
-
+    	
     	var initOptions = {
         'applicationName' : appname,
-        'clientApiKey': apikey,//'4bd5ad2a-ff2a-459c-bf0a-9d2ec90a538e',//'c6a59891-e6eb-46ed-bfb4-6a499fa4daee',//'2bd5ad2a-ff2a-459c-bf0a-9d2ec90a538e',//
+        'clientApiKey': apikey,
         'instanceId' : instanceid
     	};
 
@@ -2365,10 +2365,7 @@ function setInitParams(params) {
 		{
 			deviceEvents0=deviceevents;
 		}    	
-    	// if(bmsregion!=null && bmsregion!='')
-    	// {
-    	// 	bmsRegion=bmsregion;
-    	// }
+    	
     	metadataHeader.contextRoot = "/analytics-service";
     	metadataHeader.deviceID = "Undefined";
     	if (deviceID != null && deviceID != ''){
@@ -2376,7 +2373,7 @@ function setInitParams(params) {
     	}
     	metadataHeader.mfpAppVersion = "latest";
 
-    	metadataHeader.mfpAppName = "MFPWebApp";
+    	metadataHeader.mfpAppName = "BMSWebApp";
     	if (appName != null && appName != ''){
     		metadataHeader.mfpAppName = appName;
     	}
@@ -2392,17 +2389,18 @@ function setInitParams(params) {
 				}else{
 					configurationString = analyticsLocalStorage.getItem(KEY_REMOTE_STORAGE_CONFIG);
 				}
-
+				
 				if (configurationString === null){
 				  var state = __state();
 				  state.maxFileSize = DEFAULT_MAX_STORAGE_SIZE;
 				  __updateState(state);
-
+				
 				  var stateString = JSON.stringify(state);
 				  analyticsLocalStorage.setItem(KEY_LOCAL_STORAGE_CONFIG, stateString);
 				} else {
 				  var configuration = JSON.parse(configurationString);
 				  __updateState(configuration);
+				
 				}
 			}
 		} catch ( err ) {
@@ -2420,6 +2418,7 @@ function setInitParams(params) {
 		metadataHeader.appVersionCode = metadataHeader.mfpAppVersion;  // version as known to the app store
 		metadataHeader.appStoreId = metadataHeader.mfpAppName; // app pkg name (e.g. com.ibm.MyApp)
 		metadataHeader.appStoreLabel = metadataHeader.mfpAppName; 
+		
 		
     	initXHR(XMLHttpRequest, this);
 
@@ -2495,7 +2494,6 @@ function setInitParams(params) {
     //public analytics
     function _setUserIdentity(user) {
     	if(hasUsercontext==true){
-    		console.log('&&&hasUsercontext'+hasUsercontext);
     		logAnalyticsSessionStop();
 	    	userID = user;	
     	}
