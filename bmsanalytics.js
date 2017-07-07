@@ -2682,7 +2682,7 @@ function setInitParams(params) {
 		pkg: _pkg,
         state: __state,
         capture: capture,
-        enable: __enable,
+        storeLogs: __enable,
         //updateConfigFromServer: _updateConfigFromServer,
         //Addition
         isStoringLogs: __isStoringLogs,
