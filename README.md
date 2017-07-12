@@ -37,10 +37,10 @@
     BMSAnalytics.send();
   </script>
   ```
-# bms-analytics-clientsdk-sampleapp
+## bms-analytics-web-clientsdk-sampleapp
 Starter web app code  to connect with Bluemix Mobile Analytics  Service.
 
-## IBM Bluemix Mobile Analytics Service Platform Web Sample Application
+### IBM Bluemix Mobile Analytics Service Platform Web Sample Application
 Use this sample application to get started with development of web applications.
 The application uses the IBM Bluemix Mobile Analytics SDK to connect to a local or remote server.
  
