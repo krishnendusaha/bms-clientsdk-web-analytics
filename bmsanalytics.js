@@ -1274,7 +1274,7 @@ function setInitParams(params) {
 			}
 			else if(bmsRegion==3)
 			{	
-				url='https://'+LOG_UPLOADER_APP_ROUTE+REGION_GERMANY;
+				url='https://'+LOG_UPLOADER_APP_ROUTE+REGION_GERMANY_URL;
 			}
 			else {
 				
