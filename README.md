@@ -20,7 +20,8 @@
   ```Javascript
   require.config({
     'paths': {
-        'bmsanalytics': '/path/to/bmsanalytics.js'
+    	'bmsanalytics': '/path/to/bmsanalytics.js',
+	'bmsrequest': '/path/to/bmsrequest.js'
       }
   });
 
@@ -29,13 +30,7 @@
   }
   ```
   
-  Example usage on global context:
-  -----------------------------------
-  ```Html
-  <script src="bmsanalytics.js"></script>
-  <script>
-    BMSAnalytics.send();
-  </script>
+
   ```
 ## bms-analytics-web-clientsdk-sampleapp
 Starter web app code  to connect with Bluemix Mobile Analytics  Service.
